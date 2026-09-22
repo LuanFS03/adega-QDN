@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adega QDN</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#111;
+  color:#fff;
+}
+header{
+  background:#1d1d1d;
+  padding:20px;
+  text-align:center;
+  border-bottom:2px solid #d4af37;
+}
+.profile{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+.profile img{
+  width:85px;
+  height:85px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #d4af37;
+}
+.profile h1{
+  margin:0;
+  color:#d4af37;
+}
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+}
+.card{
+  background:#202020;
+  border-radius:14px;
+  padding:15px;
+  text-align:center;
+  box-shadow:0 3px 10px #000;
+}
+.card img{
+  width:100%;
+  height:170px;
+  object-fit:cover;
+  border-radius:10px;
+  background:#333;
+}
+.card h3{
+  margin:10px 0 5px;
+}
+.price{
+  color:#d4af37;
+  font-size:20px;
+  font-weight:bold;
+}
+button{
+  border:0;
+  border-radius:8px;
+  padding:10px 14px;
+  margin:5px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.adminBtn{
+  background:#d4af37;
+  color:#111;
+}
+.whatsapp{
+  background:#25D366;
+  color:white;
+}
+#admin{
+  display:none;
+  background:#1c1c1c;
+  padding:20px;
+  border-radius:15px;
+  margin-top:25px;
+}
+input{
+  width:100%;
+  padding:12px;
+  margin:6px 0 12px;
+  border-radius:8px;
+  border:1px solid #555;
+  background:#111;
+  color:white;
+}
+.adminProduct{
+  background:#292929;
+  padding:15px;
+  margin:10px 0;
+  border-radius:10px;
+}
+.delete{
+  background:#b00020;
+  color:white;
+}
+.save{
+  background:#d4af37;
+  color:#111;
+}
+.add{
+  background:#444;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="profile">
+    <img id="profileImage"
+      src="https://via.placeholder.com/150">
+    <h1 id="profileName">Adega QDN</h1>
+    <button class="adminBtn" onclick="login()">🔐 Área do dono</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <h2>🍻 Nossos produtos</h2>
+
+  <div id="products" class="products"></div>
+
+  <div id="admin">
+    <h2>⚙️ Painel do dono</h2>
+
+    <h3>Perfil</h3>
+
+    <label>Nome</label>
+    <input id="editName">
+
+    <label>Foto do perfil (URL)</label>
+    <input id="editImage">
+
+    <button class="save" onclick="saveProfile()">
+      💾 Salvar perfil
+    </button>
+
+    <hr>
+
+    <h3>Produtos</h3>
+
+    <div id="adminProducts"></div>
+
+    <button class="add" onclick="addProduct()">
+      ➕ Adicionar produto
+    </button>
+
+    <br>
+
+    <button class="adminBtn" onclick="logout()">
+      🔒 Sair do painel
+    </button>
+  </div>
+
+</div>
+
+<script>
+
+const SENHA = "QDN1234";
+
+let data = JSON.parse(localStorage.getItem("adegaQDN")) || {
+
+  profile:{
+    name:"Adega QDN",
+    image:"https://via.placeholder.com/150"
+  },
+
+  products:[
+    {
+      name:"Produto 1",
+      price:"R$ 0,00",
+      image:"https://via.placeholder.com/400x300"
+    },
+    {
+      name:"Produto 2",
+      price:"R$ 0,00",
+      image:"https://via.placeholder.com/400x300"
+    }
+  ]
+
+};
+
+function saveData(){
+  localStorage.setItem("adegaQDN",JSON.stringify(data));
+}
+
+function render(){
+
+  document.getElementById("profileName").textContent =
+    data.profile.name;
+
+  document.getElementById("profileImage").src =
+    data.profile.image;
+
+  const products =
+    document.getElementById("products");
+
+  products.innerHTML="";
+
+  data.products.forEach((p,index)=>{
+
+    products.innerHTML += `
+      <div class="card">
+
+        <img src="${p.image}"
+             onerror="this.src='https://via.placeholder.com/400x300'">
+
+        <h3>${p.name}</h3>
+
+        <div class="price">
+          ${p.price}
+        </div>
+
+        <button class="whatsapp"
+          onclick="buy('${p.name}')">
+          WhatsApp
+        </button>
+
+      </div>
+    `;
+
+  });
+
+}
+
+function buy(product){
+
+  const phone="5511994672815";
+
+  const text=
+    "Olá! Tenho interesse em: "+product;
+
+  window.open(
+    "https://wa.me/"+phone+
+    "?text="+encodeURIComponent(text),
+    "_blank"
+  );
+
+}
+
+function login(){
+
+  const senha=prompt("Digite a senha do proprietário:");
+
+  if(senha===SENHA){
+
+    document.getElementById("admin").style.display="block";
+
+    document.getElementById("editName").value=
+      data.profile.name;
+
+    document.getElementById("editImage").value=
+      data.profile.image;
+
+    renderAdmin();
+
+    window.scrollTo({
+      top:document.body.scrollHeight,
+      behavior:"smooth"
+    });
+
+  }else{
+
+    alert("Senha incorreta.");
+
+  }
+
+}
+
+function logout(){
+
+  document.getElementById("admin").style.display="none";
+
+}
+
+function saveProfile(){
+
+  data.profile.name=
+    document.getElementById("editName").value;
+
+  data.profile.image=
+    document.getElementById("editImage").value;
+
+  saveData();
+
+  render();
+
+  alert("Perfil salvo!");
+
+}
+
+function renderAdmin(){
+
+  const area=
+    document.getElementById("adminProducts");
+
+  area.innerHTML="";
+
+  data.products.forEach((p,index)=>{
+
+    area.innerHTML += `
+
+      <div class="adminProduct">
+
+        <label>Nome</label>
+
+        <input
+          value="${p.name}"
+          onchange="data.products[${index}].name=this.value"
+        >
+
+        <label>Preço</label>
+
+        <input
+          value="${p.price}"
+          onchange="data.products[${index}].price=this.value"
+        >
+
+        <label>Foto (URL)</label>
+
+        <input
+          value="${p.image}"
+          onchange="data.products[${index}].image=this.value"
+        >
+
+        <button class="save"
+          onclick="saveProduct(${index})">
+          💾 Salvar
+        </button>
+
+        <button class="delete"
+          onclick="deleteProduct(${index})">
+          🗑️ Excluir
+        </button>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+function saveProduct(index){
+
+  saveData();
+
+  render();
+
+  renderAdmin();
+
+  alert("Produto salvo!");
+
+}
+
+function deleteProduct(index){
+
+  if(confirm("Excluir este produto?")){
+
+    data.products.splice(index,1);
+
+    saveData();
+
+    render();
+
+    renderAdmin();
+
+  }
+
+}
+
+function addProduct(){
+
+  data.products.push({
+
+    name:"Novo produto",
+
+    price:"R$ 0,00",
+
+    image:"https://via.placeholder.com/400x300"
+
+  });
+
+  saveData();
+
+  renderAdmin();
+
+}
+
+render();
+
+</script>
+
+</body>
+</html>
